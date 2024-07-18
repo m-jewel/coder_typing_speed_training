@@ -4,8 +4,8 @@ const TypingArea = ({ originalCode }) => {
   const [typedCode, setTypedCode] = useState("");
   const [startTime, setStartTime] = useState(null);
 
-  const handleInputChange = (event) => {
-    const value = event.target.value;
+  const handleInputChange = (e) => {
+    const value = e.target.value;
 
     if (!startTime) {
       setStartTime(Date.now());
@@ -14,20 +14,20 @@ const TypingArea = ({ originalCode }) => {
     setTypedCode(value);
   };
 
-  const calculatedAccuracy = () => {
-    let correctedChars = 0;
+  const calculateAccuracy = () => {
+    let correctChars = 0;
 
     for (let i = 0; i < typedCode.length; i++) {
-      if (originalCode[i] === typedCode[i]) {
-        correctedChars++;
+      if (typedCode[i] === originalCode[i]) {
+        correctChars++;
       }
     }
 
-    return (correctedChars / originaCode.length) * 100;
+    return (correctChars / originalCode.length) * 100;
   };
 
   const calculateTimeElapsed = () => {
-    return (Date.now() - startTime) / 1000;
+    return (Date.now() - startTime) / 1000; // seconds
   };
 
   return (
