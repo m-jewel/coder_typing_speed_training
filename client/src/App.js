@@ -1,32 +1,13 @@
-import React, { useState } from "react";
-import CodeDisplay from "./CodeDisplay";
-import TypingArea from "./TypingArea";
+import React from "react";
+import FileUpload from "./FileUpload";
 
-function App() {
-  const [code, setCode] = useState("");
-
-  const handleFileUpload = (e) => {
-    const file = e.target.files[0];
-    const reader = new FileReader();
-
-    reader.onload = (event) => {
-      setCode(event.target.result);
-    };
-
-    reader.readAsText(file);
-  };
-
+const App = () => {
   return (
     <div>
-      <input
-        type="file"
-        onChange={handleFileUpload}
-        accept=".js,.txt,.py,.java,.cpp"
-      />
-      <CodeDisplay code={code} />
-      <TypingArea originalCode={code} />
+      <h1>Typing Test</h1>
+      <FileUpload />
     </div>
   );
-}
+};
 
 export default App;

@@ -32,11 +32,18 @@ const TypingArea = ({ originalCode }) => {
 
   return (
     <div>
-      <textarea value={typedCode} onChange={handleInputChange}></textarea>
+      <textarea
+        value={typedCode}
+        onChange={handleInputChange}
+        style={{ width: "100%", height: "300px" }}
+      ></textarea>
       <div>
         <p>Accuracy: {calculateAccuracy().toFixed(2)}%</p>
         <p>Time Elapsed: {calculateTimeElapsed().toFixed(2)} seconds</p>
       </div>
+      <pre>
+        <code>{originalCode}</code>
+      </pre>
     </div>
   );
 };
