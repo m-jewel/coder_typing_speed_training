@@ -1,23 +1,30 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useState } from "react";
+import CodeDisplay from "./CodeDisplay";
+import TypingArea from "./TypingArea";
 
 function App() {
+  const [code, setCode] = useState("");
+
+  const handleFileUpload = (e) => {
+    const file = e.target.files[0];
+    const reader = new FileReader();
+
+    reader.onload = (event) => {
+      setCode(event.target.result);
+    };
+
+    reader.readAsText(file);
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div>
+      <input
+        type="file"
+        onChange={handleFileUpload}
+        accept=".js,.txt,.py,.java,.cpp"
+      />
+      <CodeDisplay code={code} />
+      <TypingArea originalCode={code} />
     </div>
   );
 }
