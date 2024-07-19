@@ -17,8 +17,8 @@ const FileUpload = () => {
 
   return (
     <div>
-      <input type="file" onChange={handleFileUpload} />
-      {fileContent && <TypingArea originalCode={fileContent} />}
+      <input type="file" id="file-upload" onChange={handleFileUpload} />
+      {fileContent && <TypingArea originalText={fileContent} />}
     </div>
   );
 };
