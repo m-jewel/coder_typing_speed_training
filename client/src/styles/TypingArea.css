@@ -1,0 +1,49 @@
+.typing-container {
+  width: 80%;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.type-test {
+  border: 1px solid #ddd;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  font-family: 'Courier New', Courier, monospace;
+  position: relative;
+}
+
+.original-text {
+  white-space: pre-wrap;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.newline::after {
+  content: "↵";
+  color: #666;
+}
+
+.tab::after {
+  content: "⇥";
+  color: #999;
+}
+
+.results {
+  display: flex;
+  justify-content: space-between;
+  font-size: 16px;
+}
+
+.results p {
+  margin: 0;
+}
+
+.error {
+  color: red;
+  font-weight: bold;
+}
