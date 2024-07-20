@@ -2,12 +2,19 @@ import React, { useState } from "react";
 import TypingArea from "./TypingArea";
 import "./styles/TypingArea.css";
 
+/**
+ * FileUpload component handles the file selection and reading process.
+ * It displays the selected file name and initiates the typing test.
+ */
 const FileUpload = () => {
   const [fileContent, setFileContent] = useState("");
   const [fileName, setFileName] = useState("");
   const [error, setError] = useState("");
   const [start, setStart] = useState(false);
 
+  /**
+   * Handle file upload and read its content.
+   */
   const handleFileUpload = (event) => {
     const file = event.target.files[0];
 

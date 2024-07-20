@@ -1,6 +1,14 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import "./styles/TypingArea.css";
 
+/**
+ * TypingArea component handles the typing test functionality.
+ * It calculates the elapsed time, mistakes, WPM, and CPM.
+ * It also handles the pause, resume, restart, and stop functionalities.
+ *
+ * @param {string} originalText - The original text to be typed.
+ * @param {function} onStart - Callback function to be called when typing starts.
+ */
 const TypingArea = ({ originalText = "", onStart }) => {
   const [typedText, setTypedText] = useState("");
   const [startTime, setStartTime] = useState(null);
@@ -23,7 +31,6 @@ const TypingArea = ({ originalText = "", onStart }) => {
         }
       }, 100);
     }
-
     return () => clearInterval(intervalRef.current);
   }, [startTime, isPaused, isCompleted]);
 
@@ -42,6 +49,9 @@ const TypingArea = ({ originalText = "", onStart }) => {
     }
   }, [isPaused, startTime, isCompleted]);
 
+  /**
+   * Handle key press events to manage typing, mistakes, and completion.
+   */
   const handleKeyPress = useCallback(
     (e) => {
       let newTypedText = typedText;
@@ -101,24 +111,40 @@ const TypingArea = ({ originalText = "", onStart }) => {
     };
   }, [handleKeyPress]);
 
+  /**
+   * Calculate accuracy of the typing test.
+   * @returns {number} - Accuracy percentage.
+   */
   const calculateAccuracy = () => {
     return ((typedText.length - mistakes) / originalText.length) * 100;
   };
 
+  /**
+   * Calculate words per minute (WPM).
+   * @returns {number} - WPM value.
+   */
   const calculateWPM = () => {
     const wordsTyped = typedText
       .trim()
       .split(/\s+/)
-      .filter((word) => word.length > 0).length; // Correctly count words
+      .filter((word) => word.length > 0).length;
     const minutesElapsed = elapsedTime / 60;
     return minutesElapsed > 0 ? wordsTyped / minutesElapsed : 0;
   };
 
+  /**
+   * Calculate characters per minute (CPM).
+   * @returns {number} - CPM value.
+   */
   const calculateCPM = () => {
     const minutesElapsed = elapsedTime / 60;
     return minutesElapsed > 0 ? typedText.length / minutesElapsed : 0;
   };
 
+  /**
+   * Render the original text with coloring for typed characters.
+   * @returns {JSX.Element[]} - Array of span elements with colored characters.
+   */
   const renderText = () => {
     return originalText.split("").map((char, index) => {
       let className = "";
@@ -152,6 +178,9 @@ const TypingArea = ({ originalText = "", onStart }) => {
     });
   };
 
+  /**
+   * Handle the restart action to reset the typing test.
+   */
   const handleRestart = () => {
     setTypedText("");
     setMistakes(0);
@@ -166,6 +195,9 @@ const TypingArea = ({ originalText = "", onStart }) => {
     }
   };
 
+  /**
+   * Handle the pause action to pause and resume the typing test.
+   */
   const handlePause = () => {
     if (!isPaused) {
       pauseStartRef.current = Date.now();
@@ -185,6 +217,9 @@ const TypingArea = ({ originalText = "", onStart }) => {
     setIsPaused(!isPaused);
   };
 
+  /**
+   * Handle the stop action to complete the typing test.
+   */
   const handleStop = () => {
     setIsCompleted(true);
     clearInterval(intervalRef.current);
