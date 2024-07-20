@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import TypingArea from "./TypingArea";
+import { TypingProvider } from "./context/TypingProvider";
 import "./styles/TypingArea.css";
 
 /**
@@ -40,19 +41,24 @@ const FileUpload = () => {
   };
 
   return (
-    <div>
-      <div className="file-upload-wrapper">
-        <label className="custom-file-upload">
-          <input type="file" onChange={handleFileUpload} />
-          Choose File
-        </label>
-        {fileName && <span className="file-name">{fileName}</span>}
+    <TypingProvider>
+      <div>
+        <div className="file-upload-wrapper">
+          <label className="custom-file-upload">
+            <input type="file" onChange={handleFileUpload} />
+            Choose File
+          </label>
+          {fileName && <span className="file-name">{fileName}</span>}
+        </div>
+        {error && <p className="error">{error}</p>}
+        {fileContent && start && (
+          <TypingArea
+            originalText={fileContent}
+            onStart={() => setStart(true)}
+          />
+        )}
       </div>
-      {error && <p className="error">{error}</p>}
-      {fileContent && start && (
-        <TypingArea originalText={fileContent} onStart={() => setStart(true)} />
-      )}
-    </div>
+    </TypingProvider>
   );
 };
 

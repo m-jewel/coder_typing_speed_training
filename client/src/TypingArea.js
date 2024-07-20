@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
+import { useTypingContext } from "./context/TypingProvider";
 import "./styles/TypingArea.css";
 
 /**
@@ -10,48 +11,35 @@ import "./styles/TypingArea.css";
  * @param {function} onStart - Callback function to be called when typing starts.
  */
 const TypingArea = ({ originalText = "", onStart }) => {
-  const [typedText, setTypedText] = useState("");
-  const [startTime, setStartTime] = useState(null);
-  const [mistakes, setMistakes] = useState(0);
-  const [isPaused, setIsPaused] = useState(false);
-  const [elapsedTime, setElapsedTime] = useState(0);
-  const [isCompleted, setIsCompleted] = useState(false);
+  const {
+    typedText,
+    setTypedText,
+    startTime,
+    setStartTime,
+    mistakes,
+    setMistakes,
+    isPaused,
+    setIsPaused,
+    isCompleted,
+    setIsCompleted,
+    elapsedTime,
+    setElapsedTime,
+    totalPauseTimeRef,
+    pauseStartRef,
+    startTimer,
+    stopTimer,
+  } = useTypingContext();
+
   const typingContainerRef = useRef(null);
-  const intervalRef = useRef(null);
-  const totalPauseTimeRef = useRef(0);
-  const pauseStartRef = useRef(null);
 
-  useEffect(() => {
-    if (startTime && !intervalRef.current) {
-      intervalRef.current = setInterval(() => {
-        if (!isPaused && !isCompleted) {
-          const timeElapsed =
-            (Date.now() - startTime - totalPauseTimeRef.current) / 1000;
-          setElapsedTime(timeElapsed > 0 ? timeElapsed : 0);
-        }
-      }, 100);
-    }
-    return () => clearInterval(intervalRef.current);
-  }, [startTime, isPaused, isCompleted]);
-
+  // Focus on the typing container when component mounts
   useEffect(() => {
     if (typingContainerRef.current) {
       typingContainerRef.current.focus();
     }
+  }, []);
 
-    if (!isPaused && startTime && !isCompleted) {
-      const interval = setInterval(() => {
-        const timeElapsed =
-          (Date.now() - startTime - totalPauseTimeRef.current) / 1000;
-        setElapsedTime(timeElapsed > 0 ? timeElapsed : 0);
-      }, 100);
-      return () => clearInterval(interval);
-    }
-  }, [isPaused, startTime, isCompleted]);
-
-  /**
-   * Handle key press events to manage typing, mistakes, and completion.
-   */
+  // Handle key presses with debounce to minimize re-renders
   const handleKeyPress = useCallback(
     (e) => {
       let newTypedText = typedText;
@@ -77,30 +65,20 @@ const TypingArea = ({ originalText = "", onStart }) => {
       setTypedText(newTypedText);
 
       if (e.key !== "Backspace") {
-        // Count mistakes only when typing new characters
         if (newTypedText[typedText.length] !== originalText[typedText.length]) {
-          setMistakes(mistakes + 1);
+          setMistakes((prev) => prev + 1);
         }
       }
 
-      // Check if the typing is complete
       if (newTypedText === originalText) {
         setIsCompleted(true);
-        clearInterval(intervalRef.current);
-        intervalRef.current = null;
+        stopTimer();
       }
     },
-    [
-      typedText,
-      originalText,
-      isPaused,
-      startTime,
-      onStart,
-      mistakes,
-      isCompleted,
-    ]
+    [typedText, originalText, startTime, onStart, isPaused, isCompleted]
   );
 
+  // Add and remove keydown event listener
   useEffect(() => {
     const handleKeyPressWrapper = (e) => {
       handleKeyPress(e);
@@ -111,18 +89,12 @@ const TypingArea = ({ originalText = "", onStart }) => {
     };
   }, [handleKeyPress]);
 
-  /**
-   * Calculate accuracy of the typing test.
-   * @returns {number} - Accuracy percentage.
-   */
+  // Calculate typing accuracy
   const calculateAccuracy = () => {
     return ((typedText.length - mistakes) / originalText.length) * 100;
   };
 
-  /**
-   * Calculate words per minute (WPM).
-   * @returns {number} - WPM value.
-   */
+  // Calculate words per minute
   const calculateWPM = () => {
     const wordsTyped = typedText
       .trim()
@@ -132,19 +104,13 @@ const TypingArea = ({ originalText = "", onStart }) => {
     return minutesElapsed > 0 ? wordsTyped / minutesElapsed : 0;
   };
 
-  /**
-   * Calculate characters per minute (CPM).
-   * @returns {number} - CPM value.
-   */
+  // Calculate characters per minute
   const calculateCPM = () => {
     const minutesElapsed = elapsedTime / 60;
     return minutesElapsed > 0 ? typedText.length / minutesElapsed : 0;
   };
 
-  /**
-   * Render the original text with coloring for typed characters.
-   * @returns {JSX.Element[]} - Array of span elements with colored characters.
-   */
+  // Render the original text with colors indicating correct and incorrect characters
   const renderText = () => {
     return originalText.split("").map((char, index) => {
       let className = "";
@@ -178,9 +144,7 @@ const TypingArea = ({ originalText = "", onStart }) => {
     });
   };
 
-  /**
-   * Handle the restart action to reset the typing test.
-   */
+  // Handle restart button click
   const handleRestart = () => {
     setTypedText("");
     setMistakes(0);
@@ -188,42 +152,32 @@ const TypingArea = ({ originalText = "", onStart }) => {
     setElapsedTime(0);
     setIsCompleted(false);
     totalPauseTimeRef.current = 0;
-    clearInterval(intervalRef.current);
-    intervalRef.current = null;
+    stopTimer();
     if (typingContainerRef.current) {
       typingContainerRef.current.focus();
     }
   };
 
-  /**
-   * Handle the pause action to pause and resume the typing test.
-   */
+  // Handle pause button click
   const handlePause = () => {
     if (!isPaused) {
       pauseStartRef.current = Date.now();
-      clearInterval(intervalRef.current);
+      stopTimer();
     } else {
       const pauseDuration = Date.now() - pauseStartRef.current;
       totalPauseTimeRef.current += pauseDuration;
       if (!startTime) {
         setStartTime(Date.now() - totalPauseTimeRef.current);
       }
-      intervalRef.current = setInterval(() => {
-        const timeElapsed =
-          (Date.now() - startTime - totalPauseTimeRef.current) / 1000;
-        setElapsedTime(timeElapsed > 0 ? timeElapsed : 0);
-      }, 100);
+      startTimer();
     }
     setIsPaused(!isPaused);
   };
 
-  /**
-   * Handle the stop action to complete the typing test.
-   */
+  // Handle stop button click
   const handleStop = () => {
     setIsCompleted(true);
-    clearInterval(intervalRef.current);
-    intervalRef.current = null;
+    stopTimer();
   };
 
   return (
