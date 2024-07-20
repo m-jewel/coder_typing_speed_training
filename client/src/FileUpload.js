@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import TypingArea from "./TypingArea";
+import "./styles/TypingArea.css";
 
 const FileUpload = () => {
   const [fileContent, setFileContent] = useState("");
+  const [fileName, setFileName] = useState("");
   const [error, setError] = useState("");
   const [start, setStart] = useState(false);
 
@@ -18,6 +20,7 @@ const FileUpload = () => {
 
     reader.onload = (event) => {
       setFileContent(event.target.result);
+      setFileName(file.name);
       setError("");
       setStart(true); // Start the timer when file is uploaded
     };
@@ -31,7 +34,13 @@ const FileUpload = () => {
 
   return (
     <div>
-      <input type="file" onChange={handleFileUpload} />
+      <div className="file-upload-wrapper">
+        <label className="custom-file-upload">
+          <input type="file" onChange={handleFileUpload} />
+          Choose File
+        </label>
+        {fileName && <span className="file-name">{fileName}</span>}
+      </div>
       {error && <p className="error">{error}</p>}
       {fileContent && start && (
         <TypingArea originalText={fileContent} onStart={() => setStart(true)} />

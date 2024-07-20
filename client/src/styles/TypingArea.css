@@ -1,10 +1,12 @@
 .typing-container {
   width: 80%;
-  margin: 0 auto;
+  margin: 20px auto;
   padding: 20px;
   background-color: #f9f9f9;
   border-radius: 10px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  font-family: Arial, sans-serif;
+  position: relative;
 }
 
 .type-test {
@@ -15,6 +17,8 @@
   margin-bottom: 20px;
   font-family: 'Courier New', Courier, monospace;
   position: relative;
+  max-height: 400px;
+  overflow-y: auto;
 }
 
 .original-text {
@@ -33,23 +37,13 @@
   color: #999;
 }
 
-.results {
-  display: flex;
-  justify-content: space-between;
-  font-size: 16px;
-}
-
-.results p {
-  margin: 0;
-}
-
 .error {
   color: red;
   font-weight: bold;
 }
 
 .result-popup {
-  position: absolute;
+  position: fixed;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
@@ -58,8 +52,99 @@
   padding: 20px;
   z-index: 1000;
   text-align: center;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.result-popup h2 {
+  margin-top: 0;
+}
+
+.result-popup button {
+  padding: 10px 20px;
+  background-color: #e0e0e0;
+  border: none;
+  border-radius: 5px;
+  color: #333;
+  cursor: pointer;
+}
+
+.result-popup button:hover {
+  background-color: #ccc;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header h1 {
+  margin: 0;
+}
+
+.controls {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
 }
 
 .controls button {
-  margin: 5px;
+  margin-right: 10px;
+  padding: 10px 15px;
+  font-size: 16px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  background-color: #e0e0e0;
+  color: #333;
+}
+
+.controls button:hover {
+  background-color: #ccc;
+}
+
+.controls button:focus {
+  outline: none;
+}
+
+.results {
+  display: flex;
+  justify-content: space-between;
+  font-size: 16px;
+  margin-bottom: 20px;
+}
+
+.results p {
+  margin: 0;
+}
+
+.file-upload-wrapper {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.custom-file-upload {
+  display: inline-block;
+  padding: 5px 10px;
+  cursor: pointer;
+  background-color: #e0e0e0;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 16px;
+  color: #333;
+}
+
+.custom-file-upload:hover {
+  background-color: #ccc;
+}
+
+input[type="file"] {
+  display: none;
+}
+
+.file-name {
+  margin-left: 10px;
+  font-size: 16px;
+  color: #333;
 }

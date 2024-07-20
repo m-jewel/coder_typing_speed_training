@@ -17,9 +17,9 @@ const TypingArea = ({ originalText = "", onStart }) => {
     if (startTime && !intervalRef.current) {
       intervalRef.current = setInterval(() => {
         if (!isPaused && !isCompleted) {
-          setElapsedTime(
-            (Date.now() - startTime - totalPauseTimeRef.current) / 1000
-          );
+          const timeElapsed =
+            (Date.now() - startTime - totalPauseTimeRef.current) / 1000;
+          setElapsedTime(timeElapsed > 0 ? timeElapsed : 0);
         }
       }, 100);
     }
@@ -34,9 +34,9 @@ const TypingArea = ({ originalText = "", onStart }) => {
 
     if (!isPaused && startTime && !isCompleted) {
       const interval = setInterval(() => {
-        setElapsedTime(
-          (Date.now() - startTime - totalPauseTimeRef.current) / 1000
-        );
+        const timeElapsed =
+          (Date.now() - startTime - totalPauseTimeRef.current) / 1000;
+        setElapsedTime(timeElapsed > 0 ? timeElapsed : 0);
       }, 100);
       return () => clearInterval(interval);
     }
@@ -44,17 +44,15 @@ const TypingArea = ({ originalText = "", onStart }) => {
 
   const handleKeyPress = useCallback(
     (e) => {
-      if (!startTime) {
-        const now = Date.now();
-        setStartTime(now);
-        onStart();
-      }
-
-      if (isPaused || isCompleted) return; // Do nothing if paused or completed
-
       let newTypedText = typedText;
       if (e.key.length === 1 || e.key === "Enter" || e.key === "Tab") {
         e.preventDefault();
+        if (!startTime) {
+          const now = Date.now();
+          setStartTime(now);
+          onStart();
+        }
+
         if (e.key === "Enter") {
           newTypedText += "\n";
         } else if (e.key === "Tab") {
@@ -175,10 +173,13 @@ const TypingArea = ({ originalText = "", onStart }) => {
     } else {
       const pauseDuration = Date.now() - pauseStartRef.current;
       totalPauseTimeRef.current += pauseDuration;
+      if (!startTime) {
+        setStartTime(Date.now() - totalPauseTimeRef.current);
+      }
       intervalRef.current = setInterval(() => {
-        setElapsedTime(
-          (Date.now() - startTime - totalPauseTimeRef.current) / 1000
-        );
+        const timeElapsed =
+          (Date.now() - startTime - totalPauseTimeRef.current) / 1000;
+        setElapsedTime(timeElapsed > 0 ? timeElapsed : 0);
       }, 100);
     }
     setIsPaused(!isPaused);
@@ -191,12 +192,14 @@ const TypingArea = ({ originalText = "", onStart }) => {
   };
 
   return (
-    <div
-      className="typing-container"
-      id="typing-area"
-      tabIndex={0}
-      ref={typingContainerRef}
-    >
+    <div className="typing-container">
+      <div className="header">
+        <div className="controls">
+          <button onClick={handleRestart}>Restart</button>
+          <button onClick={handlePause}>{isPaused ? "Resume" : "Pause"}</button>
+          <button onClick={handleStop}>Stop</button>
+        </div>
+      </div>
       <div className="results">
         <p>Accuracy: {originalText ? calculateAccuracy().toFixed(2) : 0}%</p>
         <p>Mistakes: {mistakes}</p>
@@ -206,11 +209,6 @@ const TypingArea = ({ originalText = "", onStart }) => {
       </div>
       <div className="type-test">
         <pre className="original-text">{renderText()}</pre>
-      </div>
-      <div className="controls">
-        <button onClick={handleRestart}>Restart</button>
-        <button onClick={handlePause}>{isPaused ? "Resume" : "Pause"}</button>
-        <button onClick={handleStop}>Stop</button>
       </div>
       {isCompleted && (
         <div className="result-popup">
