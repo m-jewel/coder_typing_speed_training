@@ -1,40 +1,56 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import "./styles/TypingArea.css";
 
-const TypingArea = ({ originalText = "" }) => {
+const TypingArea = ({ originalText = "", onStart }) => {
   const [typedText, setTypedText] = useState("");
   const [startTime, setStartTime] = useState(null);
   const [mistakes, setMistakes] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+  const [elapsedTime, setElapsedTime] = useState(0);
   const typingContainerRef = useRef(null);
+  const intervalRef = useRef(null);
+  const totalPauseTimeRef = useRef(0);
+  const pauseStartRef = useRef(null);
 
   useEffect(() => {
-    if (typedText.length === 1) {
-      setStartTime(Date.now());
-    }
-
-    const calculateMistakes = () => {
-      let mistakeCount = 0;
-      for (let i = 0; i < typedText.length; i++) {
-        if (typedText[i] !== originalText[i]) {
-          mistakeCount++;
+    if (startTime && !intervalRef.current) {
+      intervalRef.current = setInterval(() => {
+        if (!isPaused) {
+          setElapsedTime(
+            (Date.now() - startTime - totalPauseTimeRef.current) / 1000
+          );
         }
-      }
-      setMistakes(mistakeCount);
-    };
-
-    if (originalText) {
-      calculateMistakes();
+      }, 100);
     }
-  }, [typedText, originalText]);
+
+    return () => clearInterval(intervalRef.current);
+  }, [startTime, isPaused]);
 
   useEffect(() => {
     if (typingContainerRef.current) {
       typingContainerRef.current.focus();
     }
-  }, []);
+
+    if (!isPaused && startTime) {
+      const interval = setInterval(() => {
+        setElapsedTime(
+          (Date.now() - startTime - totalPauseTimeRef.current) / 1000
+        );
+      }, 100);
+      return () => clearInterval(interval);
+    }
+  }, [isPaused, startTime]);
 
   const handleKeyPress = useCallback(
     (e) => {
+      if (!startTime) {
+        const now = Date.now();
+        setStartTime(now);
+        onStart();
+      }
+
+      if (isPaused) return; // Do nothing if paused
+
       let newTypedText = typedText;
       if (e.key.length === 1 || e.key === "Enter" || e.key === "Tab") {
         e.preventDefault();
@@ -51,13 +67,14 @@ const TypingArea = ({ originalText = "" }) => {
 
       setTypedText(newTypedText);
 
-      const isCorrect =
-        originalText.slice(0, newTypedText.length) === newTypedText;
-      if (!isCorrect) {
-        setMistakes((prevMistakes) => prevMistakes + 1);
+      if (e.key !== "Backspace") {
+        // Count mistakes only when typing new characters
+        if (newTypedText[typedText.length] !== originalText[typedText.length]) {
+          setMistakes(mistakes + 1);
+        }
       }
     },
-    [typedText, originalText]
+    [typedText, originalText, isPaused, startTime, onStart, mistakes]
   );
 
   useEffect(() => {
@@ -74,19 +91,18 @@ const TypingArea = ({ originalText = "" }) => {
     return ((typedText.length - mistakes) / originalText.length) * 100;
   };
 
-  const calculateTimeElapsed = () => {
-    return (Date.now() - startTime) / 1000;
-  };
-
   const calculateWPM = () => {
-    const wordsTyped = typedText.split(" ").length;
-    const minutesElapsed = calculateTimeElapsed() / 60;
-    return wordsTyped / minutesElapsed;
+    const wordsTyped = typedText
+      .trim()
+      .split(/\s+/)
+      .filter((word) => word.length > 0).length; // Correctly count words
+    const minutesElapsed = elapsedTime / 60;
+    return minutesElapsed > 0 ? wordsTyped / minutesElapsed : 0;
   };
 
   const calculateCPM = () => {
-    const minutesElapsed = calculateTimeElapsed() / 60;
-    return typedText.length / minutesElapsed;
+    const minutesElapsed = elapsedTime / 60;
+    return minutesElapsed > 0 ? typedText.length / minutesElapsed : 0;
   };
 
   const renderText = () => {
@@ -122,6 +138,35 @@ const TypingArea = ({ originalText = "" }) => {
     });
   };
 
+  const handleRestart = () => {
+    setTypedText("");
+    setMistakes(0);
+    setStartTime(null);
+    setElapsedTime(0);
+    totalPauseTimeRef.current = 0;
+    clearInterval(intervalRef.current);
+    intervalRef.current = null;
+    if (typingContainerRef.current) {
+      typingContainerRef.current.focus();
+    }
+  };
+
+  const handlePause = () => {
+    if (!isPaused) {
+      pauseStartRef.current = Date.now();
+      clearInterval(intervalRef.current);
+    } else {
+      const pauseDuration = Date.now() - pauseStartRef.current;
+      totalPauseTimeRef.current += pauseDuration;
+      intervalRef.current = setInterval(() => {
+        setElapsedTime(
+          (Date.now() - startTime - totalPauseTimeRef.current) / 1000
+        );
+      }, 100);
+    }
+    setIsPaused(!isPaused);
+  };
+
   return (
     <div
       className="typing-container"
@@ -129,18 +174,19 @@ const TypingArea = ({ originalText = "" }) => {
       tabIndex={0}
       ref={typingContainerRef}
     >
-      <div className="type-test">
-        <pre className="original-text">{renderText()}</pre>
-      </div>
       <div className="results">
         <p>Accuracy: {originalText ? calculateAccuracy().toFixed(2) : 0}%</p>
         <p>Mistakes: {mistakes}</p>
-        <p>
-          Time Elapsed: {originalText ? calculateTimeElapsed().toFixed(2) : 0}{" "}
-          seconds
-        </p>
+        <p>Time Elapsed: {originalText ? elapsedTime.toFixed(2) : 0} seconds</p>
         <p>WPM: {originalText ? calculateWPM().toFixed(2) : 0}</p>
         <p>CPM: {originalText ? calculateCPM().toFixed(2) : 0}</p>
+      </div>
+      <div className="type-test">
+        <pre className="original-text">{renderText()}</pre>
+      </div>
+      <div className="controls">
+        <button onClick={handleRestart}>Restart</button>
+        <button onClick={handlePause}>{isPaused ? "Resume" : "Pause"}</button>
       </div>
     </div>
   );

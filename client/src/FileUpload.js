@@ -4,6 +4,7 @@ import TypingArea from "./TypingArea";
 const FileUpload = () => {
   const [fileContent, setFileContent] = useState("");
   const [error, setError] = useState("");
+  const [start, setStart] = useState(false);
 
   const handleFileUpload = (event) => {
     const file = event.target.files[0];
@@ -18,6 +19,7 @@ const FileUpload = () => {
     reader.onload = (event) => {
       setFileContent(event.target.result);
       setError("");
+      setStart(true); // Start the timer when file is uploaded
     };
 
     reader.onerror = () => {
@@ -31,7 +33,9 @@ const FileUpload = () => {
     <div>
       <input type="file" onChange={handleFileUpload} />
       {error && <p className="error">{error}</p>}
-      {fileContent && <TypingArea originalText={fileContent} />}
+      {fileContent && start && (
+        <TypingArea originalText={fileContent} onStart={() => setStart(true)} />
+      )}
     </div>
   );
 };
