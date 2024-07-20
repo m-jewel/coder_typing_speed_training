@@ -47,3 +47,19 @@
   color: red;
   font-weight: bold;
 }
+
+.result-popup {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  border: 1px solid #ccc;
+  padding: 20px;
+  z-index: 1000;
+  text-align: center;
+}
+
+.controls button {
+  margin: 5px;
+}
