@@ -4,6 +4,7 @@ import React, {
   useContext,
   useEffect,
   useRef,
+  useCallback,
 } from "react";
 
 // Create TypingContext for global state management
@@ -25,7 +26,7 @@ export const TypingProvider = ({ children }) => {
   const intervalRef = useRef(null);
 
   // Function to start the timer
-  const startTimer = () => {
+  const startTimer = useCallback(() => {
     if (!intervalRef.current) {
       intervalRef.current = setInterval(() => {
         if (!isPaused && !isCompleted) {
@@ -35,13 +36,13 @@ export const TypingProvider = ({ children }) => {
         }
       }, 100);
     }
-  };
+  }, [isPaused, isCompleted, startTime]);
 
   // Function to stop the timer
-  const stopTimer = () => {
+  const stopTimer = useCallback(() => {
     clearInterval(intervalRef.current);
     intervalRef.current = null;
-  };
+  }, []);
 
   // Start timer when startTime changes and no interval is running
   useEffect(() => {
@@ -49,7 +50,7 @@ export const TypingProvider = ({ children }) => {
       startTimer();
     }
     return () => stopTimer();
-  }, [startTime, isPaused, isCompleted]);
+  }, [startTime, isPaused, isCompleted, startTimer, stopTimer]);
 
   return (
     <TypingContext.Provider

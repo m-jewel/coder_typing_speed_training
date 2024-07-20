@@ -39,7 +39,7 @@ const TypingArea = ({ originalText = "", onStart }) => {
     }
   }, []);
 
-  // Handle key presses with debounce to minimize re-renders
+  // Handle key presses to minimize re-renders
   const handleKeyPress = useCallback(
     (e) => {
       let newTypedText = typedText;
@@ -75,7 +75,17 @@ const TypingArea = ({ originalText = "", onStart }) => {
         stopTimer();
       }
     },
-    [typedText, originalText, startTime, onStart, isPaused, isCompleted]
+    [
+      typedText,
+      originalText,
+      startTime,
+      setStartTime,
+      setTypedText,
+      setMistakes,
+      setIsCompleted,
+      stopTimer,
+      onStart,
+    ]
   );
 
   // Add and remove keydown event listener
