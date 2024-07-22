@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/coder_typing_speed_training/static/css/main.6eee0e08.css",
+    "main.js": "/coder_typing_speed_training/static/js/main.52f63a6c.js",
+    "index.html": "/coder_typing_speed_training/index.html",
+    "main.6eee0e08.css.map": "/coder_typing_speed_training/static/css/main.6eee0e08.css.map",
+    "main.52f63a6c.js.map": "/coder_typing_speed_training/static/js/main.52f63a6c.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.6eee0e08.css",
+    "static/js/main.52f63a6c.js"
+  ]
+}
