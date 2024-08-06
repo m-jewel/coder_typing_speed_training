@@ -1,5 +1,5 @@
 ## About
-Welcome to the Typing Speed Trainer! This project aims to help improve user's typing skills by providing a fun and interactive typing test.
+Typing Speed Trainer is a project that aims to help improve user's typing skills by providing a fun and interactive typing test.
 
 ## Features
 1. Upload Your Own Files: Users can upload their own text files and practice typing with the content from those files. This feature makes the typing practice more personalized and relevant.
